@@ -32,4 +32,16 @@ async def on_ready():
         print(f"Loaded Commands: {', '.join(loaded_commands)}")
     print("==============================")
 
+    @client.event
+    async def on_ready():
+        await client.tree.sync()
+        print("==============================")
+        print("🎰 Cantina Casino Bot is Online! 🎰")
+        print(f"Application name: {client.user.name}")
+        print(f"Application ID   : {client.user.id}")
+        print(f"Servers  : {len(client.guilds)}")
+        if loaded_commands:
+            print(f"Loaded Commands: {', '.join(loaded_commands)}")
+
+
 client.run(token)

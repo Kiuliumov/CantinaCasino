@@ -1,15 +1,11 @@
 from typing import Optional, List
 from sqlalchemy import Column, Integer, BigInteger, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
 Base = declarative_base()
 
 
 class User(Base):
-    """
-    Represents a global Discord user.
-    """
     __tablename__ = "users"
 
     discord_id: int = Column(BigInteger, primary_key=True, unique=True)
@@ -18,20 +14,12 @@ class User(Base):
     level: int = Column(Integer, default=1)
 
     def __repr__(self) -> str:
-        return (f"<User {self.discord_id} | Balance {self.balance} | "
-                f"EXP {self.experience} | Level {self.level}>")
+        return f"<User {self.discord_id} | Balance {self.balance} | EXP {self.experience} | Level {self.level}>"
 
 
 class Database:
-    """
-    Global database for Discord users with lazy ranking, compatible with PostgreSQL.
-    """
-    def __init__(self, postgres_url: str) -> None:
-        """
-        postgres_url: PostgreSQL connection string in the form:
-        'postgresql+psycopg2://username:password@host:port/database_name'
-        """
-        self.engine = create_engine(postgres_url, echo=False)
+    def __init__(self, sqlite_path: str = "sqlite:///casino.db") -> None:
+        self.engine = create_engine(sqlite_path, echo=False)
         Base.metadata.create_all(self.engine)
         self.SessionLocal = sessionmaker(bind=self.engine)
 
@@ -102,9 +90,13 @@ class Database:
     def top_balance(self, limit: int = 10, offset: int = 0) -> List[User]:
         session: Session = self.SessionLocal()
         try:
-            users = session.query(User)\
-                .order_by(User.balance.desc(), User.discord_id.asc())\
-                .offset(offset).limit(limit).all()
+            users = (
+                session.query(User)
+                .order_by(User.balance.desc(), User.discord_id.asc())
+                .offset(offset)
+                .limit(limit)
+                .all()
+            )
         finally:
             session.close()
         return users
@@ -112,9 +104,13 @@ class Database:
     def top_experience(self, limit: int = 10, offset: int = 0) -> List[User]:
         session: Session = self.SessionLocal()
         try:
-            users = session.query(User)\
-                .order_by(User.experience.desc(), User.discord_id.asc())\
-                .offset(offset).limit(limit).all()
+            users = (
+                session.query(User)
+                .order_by(User.experience.desc(), User.discord_id.asc())
+                .offset(offset)
+                .limit(limit)
+                .all()
+            )
         finally:
             session.close()
         return users
@@ -126,9 +122,9 @@ class Database:
             if not user:
                 return 0
             rank = session.query(User).filter(User.balance > user.balance).count() + 1
-            return rank
         finally:
             session.close()
+        return rank
 
     def get_experience_rank(self, discord_id: int) -> int:
         session: Session = self.SessionLocal()
@@ -137,14 +133,13 @@ class Database:
             if not user:
                 return 0
             rank = session.query(User).filter(User.experience > user.experience).count() + 1
-            return rank
         finally:
             session.close()
+        return rank
 
     def leaderboard(self, by: str = "balance", limit: int = 10, offset: int = 0) -> List[User]:
         if by == "balance":
             return self.top_balance(limit=limit, offset=offset)
-        elif by == "experience":
+        if by == "experience":
             return self.top_experience(limit=limit, offset=offset)
-        else:
-            raise ValueError("Leaderboard 'by' must be 'balance' or 'experience'")
+        raise ValueError("Leaderboard 'by' must be 'balance' or 'experience'")

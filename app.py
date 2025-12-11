@@ -6,17 +6,30 @@ dotenv.load_dotenv()
 
 token: str = os.getenv('TOKEN')
 
-for filename in os.listdir("./cogs"):
-    if filename.endswith(".py"):
-        client.load_extension(f"cogs.{filename[:-3]}")
+loaded_commands = []
+
+@client.event
+async def setup_hook():
+    global loaded_commands
+    for filename in os.listdir("./cogs"):
+        if filename.endswith(".py"):
+            cog_name = f"cogs.{filename[:-3]}"
+            await client.load_extension(cog_name)
+            print(f"Loaded extension: {filename}")
+            cog = client.get_cog(filename[:-3])
+            if cog:
+                for command in cog.get_commands():
+                    loaded_commands.append(command.name)
 
 @client.event
 async def on_ready():
-    print(f"==============================")
-    print(f"🎰 Cantina Casino Bot is Online! 🎰")
+    print("==============================")
+    print("🎰 Cantina Casino Bot is Online! 🎰")
     print(f"Application name: {client.user.name}")
     print(f"Application ID   : {client.user.id}")
     print(f"Servers  : {len(client.guilds)}")
-    print(f"==============================")
+    if loaded_commands:
+        print(f"Loaded Commands: {', '.join(loaded_commands)}")
+    print("==============================")
 
 client.run(token)

@@ -24,17 +24,18 @@ class User(Base):
 
 class Database:
     """
-    Global database for Discord users with lazy ranking.
+    Global database for Discord users with lazy ranking, compatible with PostgreSQL.
     """
-    def __init__(self, db_path: str = "cantina.db") -> None:
-        self.engine = create_engine(f"sqlite:///{db_path}", echo=False)
+    def __init__(self, postgres_url: str) -> None:
+        """
+        postgres_url: PostgreSQL connection string in the form:
+        'postgresql+psycopg2://username:password@host:port/database_name'
+        """
+        self.engine = create_engine(postgres_url, echo=False)
         Base.metadata.create_all(self.engine)
         self.SessionLocal = sessionmaker(bind=self.engine)
 
     def add_user(self, discord_id: int) -> User:
-        """
-        Adds a new user globally if they don't exist.
-        """
         session: Session = self.SessionLocal()
         try:
             user = session.query(User).filter_by(discord_id=discord_id).first()
@@ -48,9 +49,6 @@ class Database:
         return user
 
     def get_user(self, discord_id: int) -> Optional[User]:
-        """
-        Returns the user object if exists, else None.
-        """
         session: Session = self.SessionLocal()
         try:
             user = session.query(User).filter_by(discord_id=discord_id).first()
@@ -59,9 +57,6 @@ class Database:
         return user
 
     def update_balance(self, discord_id: int, amount: int) -> None:
-        """
-        Updates the user's balance.
-        """
         session: Session = self.SessionLocal()
         try:
             user = session.query(User).filter_by(discord_id=discord_id).first()
@@ -72,9 +67,6 @@ class Database:
             session.close()
 
     def set_balance(self, discord_id: int, amount: int) -> None:
-        """
-        Sets the user's balance.
-        """
         session: Session = self.SessionLocal()
         try:
             user = session.query(User).filter_by(discord_id=discord_id).first()
@@ -85,9 +77,6 @@ class Database:
             session.close()
 
     def update_experience(self, discord_id: int, exp: int) -> None:
-        """
-        Adds experience points to a user and auto-levels them.
-        """
         session: Session = self.SessionLocal()
         try:
             user = session.query(User).filter_by(discord_id=discord_id).first()
@@ -101,9 +90,6 @@ class Database:
             session.close()
 
     def set_experience(self, discord_id: int, exp: int) -> None:
-        """
-        Sets experience for a user.
-        """
         session: Session = self.SessionLocal()
         try:
             user = session.query(User).filter_by(discord_id=discord_id).first()
@@ -114,33 +100,26 @@ class Database:
             session.close()
 
     def top_balance(self, limit: int = 10, offset: int = 0) -> List[User]:
-        """
-        Returns top users globally by balance with optional offset.
-        """
         session: Session = self.SessionLocal()
         try:
-            users = session.query(User).order_by(User.balance.desc(), User.discord_id.asc())\
+            users = session.query(User)\
+                .order_by(User.balance.desc(), User.discord_id.asc())\
                 .offset(offset).limit(limit).all()
         finally:
             session.close()
         return users
 
     def top_experience(self, limit: int = 10, offset: int = 0) -> List[User]:
-        """
-        Returns top users globally by experience with optional offset.
-        """
         session: Session = self.SessionLocal()
         try:
-            users = session.query(User).order_by(User.experience.desc(), User.discord_id.asc())\
+            users = session.query(User)\
+                .order_by(User.experience.desc(), User.discord_id.asc())\
                 .offset(offset).limit(limit).all()
         finally:
             session.close()
         return users
 
     def get_balance_rank(self, discord_id: int) -> int:
-        """
-        Returns the global balance rank of the user (1-based).
-        """
         session: Session = self.SessionLocal()
         try:
             user = session.query(User).filter_by(discord_id=discord_id).first()
@@ -152,9 +131,6 @@ class Database:
             session.close()
 
     def get_experience_rank(self, discord_id: int) -> int:
-        """
-        Returns the global experience rank of the user (1-based).
-        """
         session: Session = self.SessionLocal()
         try:
             user = session.query(User).filter_by(discord_id=discord_id).first()
@@ -166,11 +142,6 @@ class Database:
             session.close()
 
     def leaderboard(self, by: str = "balance", limit: int = 10, offset: int = 0) -> List[User]:
-        """
-        Returns a global leaderboard.
-        'by' can be 'balance' or 'experience'.
-        Supports limit and offset for pagination.
-        """
         if by == "balance":
             return self.top_balance(limit=limit, offset=offset)
         elif by == "experience":

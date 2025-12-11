@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker, Session
 
 Base = declarative_base()
 
+
 class User(Base):
     """
     Represents a global Discord user.
@@ -19,6 +20,7 @@ class User(Base):
     def __repr__(self) -> str:
         return (f"<User {self.discord_id} | Balance {self.balance} | "
                 f"EXP {self.experience} | Level {self.level}>")
+
 
 class Database:
     """

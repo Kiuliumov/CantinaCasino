@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from datetime import timezone
+import datetime
 import os
 
 
@@ -23,7 +23,7 @@ class InfoCog(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.start_time = timezone.aware()
+        self.start_time = datetime.datetime.now()
         self.logo_path = os.path.join("images", "cantina-logo.png")
         if not os.path.exists(self.logo_path):
             self.logo_path = None

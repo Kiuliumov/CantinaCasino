@@ -1,15 +1,29 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-import datetime
+from datetime import timezone
 import os
+
+
+class InfoView(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(discord.ui.Button(
+            label="Join The Cantina",
+            url="https://discord.com/invite/UEjnQeAHYx"
+        ))
+        self.add_item(discord.ui.Button(
+            label="GitHub: CantinaCasino",
+            url="https://github.com/Kiuliumov/CantinaCasino"
+        ))
+
 
 class InfoCog(commands.Cog):
     """Application info and development info for CantinaCasino."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.start_time = datetime.datetime.utcnow()
+        self.start_time = timezone.aware()
         self.logo_path = os.path.join("images", "cantina-logo.png")
         if not os.path.exists(self.logo_path):
             self.logo_path = None
@@ -35,12 +49,41 @@ class InfoCog(commands.Cog):
 
         embed.set_thumbnail(url=self.bot.user.display_avatar.url)
 
+        view = InfoView()
+
         if self.logo_path:
             file = discord.File(self.logo_path, filename="cantina-logo.png")
             embed.set_image(url="attachment://cantina-logo.png")
-            await interaction.response.send_message(embed=embed, file=file)
+            await interaction.response.send_message(embed=embed, file=file, view=view)
         else:
-            await interaction.response.send_message(embed=embed)
+            await interaction.response.send_message(embed=embed, view=view)
+
+    @app_commands.command(name="about", description="General overview of CantinaCasino")
+    async def about(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="📜 About CantinaCasino",
+            description=(
+                "CantinaCasino is a custom-built gambling & progression application created by **The Cantina**.\n\n"
+                "It features:\n"
+                "🎲 Casino-style games\n"
+                "💰 Global balances & leaderboards\n"
+                "📈 Experience and leveling\n"
+                "🛠️ Modular, scalable architecture\n\n"
+                "CantinaCasino continues to expand with more games, systems, and features."
+            ),
+            color=discord.Color.gold()
+        )
+
+        embed.set_thumbnail(url=self.bot.user.display_avatar.url)
+
+        view = InfoView()
+
+        if self.logo_path:
+            file = discord.File(self.logo_path, filename="cantina-logo.png")
+            embed.set_image(url="attachment://cantina-logo.png")
+            await interaction.response.send_message(embed=embed, file=file, view=view)
+        else:
+            await interaction.response.send_message(embed=embed, view=view)
 
     @app_commands.command(name="development", description="Shows information about The Cantina team")
     async def development(self, interaction: discord.Interaction):
@@ -48,23 +91,25 @@ class InfoCog(commands.Cog):
             title="🛠️ About The Cantina",
             description=(
                 "The Cantina is a self-run project with no outside financing.\n"
-                "Our mission is to create the best chatbots in the market while building modern, responsive web applications.\n\n"
-                "🤖 Experienced in building custom Discord bots with JavaScript and Python\n"
-                "🌐 Skilled at creating modern, responsive web apps using React and Tailwind\n"
-                "⚙️ Integrating APIs, handling databases, and automating tasks\n"
-                "🚀 Always learning new frameworks and best practices in full-stack development\n\n"
-                "Our goal is to create the best chatbots in the market.\n"
-                "If you want to join us: ikiuliumov@gmail.com"
+                "We aim to build the best chatbots and modern, responsive web applications.\n\n"
+                "🤖 Custom Discord bots (Python + JavaScript)\n"
+                "🌐 Web apps using React + Tailwind\n"
+                "⚙️ Database work, APIs, automation\n"
+                "🚀 Constantly learning new technologies\n\n"
+                "Our goal: **Create the best chatbots in the market.**\n"
+                "Interested in joining? Email: ikiuliumov@gmail.com"
             ),
             color=discord.Color.green()
         )
 
+        view = InfoView()
+
         if self.logo_path:
             file = discord.File(self.logo_path, filename="cantina-logo.png")
             embed.set_thumbnail(url="attachment://cantina-logo.png")
-            await interaction.response.send_message(embed=embed, file=file)
+            await interaction.response.send_message(embed=embed, file=file, view=view)
         else:
-            await interaction.response.send_message(embed=embed)
+            await interaction.response.send_message(embed=embed, view=view)
 
 
 async def setup(bot: commands.Bot):

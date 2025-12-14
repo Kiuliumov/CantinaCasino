@@ -3,14 +3,15 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from src.DB import Database
-
-from .games.blackjack.blackjack_view import BlackjackView
+from src.decorators import autoregister
+from cogs.games.blackjack.blackjack_view import BlackjackView
 
 class BlackjackCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.db = Database()
 
+    @autoregister(db=Database("sqlite:///casino.db"))
     @app_commands.command(name="blackjack", description="Play blackjack")
     async def blackjack(self, interaction: discord.Interaction):
         self.db.add_user(interaction.user.id)

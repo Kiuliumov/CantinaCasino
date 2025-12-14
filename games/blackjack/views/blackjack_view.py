@@ -1,5 +1,4 @@
-
-
+import discord
 class BlackjackView(discord.ui.View):
     def __init__(self, interaction: discord.Interaction, db: Database):
         super().__init__(timeout=90)

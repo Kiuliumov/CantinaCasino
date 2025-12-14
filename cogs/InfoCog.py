@@ -1,8 +1,9 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-import datetime
-import os
+
+
+CANTINA_IMAGE_URL = "https://kiuliumov.github.io/portfolioV2/images/cantina.png"
 
 
 class InfoView(discord.ui.View):
@@ -13,7 +14,7 @@ class InfoView(discord.ui.View):
             url="https://discord.com/invite/UEjnQeAHYx"
         ))
         self.add_item(discord.ui.Button(
-            label="GitHub: CantinaCasino",
+            label="GitHub",
             url="https://github.com/Kiuliumov/CantinaCasino"
         ))
 
@@ -23,48 +24,64 @@ class InfoCog(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.start_time = datetime.datetime.now()
-        self.logo_path = os.path.join("images", "cantina-logo.png")
-        if not os.path.exists(self.logo_path):
-            self.logo_path = None
 
-    @app_commands.command(name="info", description="Shows info about the CantinaCasino application")
+    @app_commands.command(
+        name="info",
+        description="Shows info about the CantinaCasino application"
+    )
     async def info(self, interaction: discord.Interaction):
-        now = datetime.datetime.utcnow()
-        uptime = now - self.start_time
-        uptime_str = str(uptime).split(".")[0]
-
         embed = discord.Embed(
             title="🎰 CantinaCasino Application Info",
             color=discord.Color.blurple(),
-            timestamp=now
         )
 
-        embed.add_field(name="Project", value="CantinaCasino is a project by The Cantina", inline=False)
-        embed.add_field(name="Application Name", value=self.bot.user.name, inline=True)
-        embed.add_field(name="Application ID", value=self.bot.user.id, inline=True)
-        embed.add_field(name="Servers", value=len(self.bot.guilds), inline=True)
-        embed.add_field(name="Total Users", value=len(set(self.bot.get_all_members())), inline=True)
-        embed.add_field(name="Uptime", value=uptime_str, inline=False)
+        embed.add_field(
+            name="Project",
+            value="CantinaCasino is a project by The Cantina",
+            inline=False
+        )
+        embed.add_field(
+            name="Application Name",
+            value=self.bot.user.name,
+            inline=True
+        )
+        embed.add_field(
+            name="Application ID",
+            value=self.bot.user.id,
+            inline=True
+        )
+        embed.add_field(
+            name="Servers",
+            value=len(self.bot.guilds),
+            inline=True
+        )
+        embed.add_field(
+            name="Total Users",
+            value=len(set(self.bot.get_all_members())),
+            inline=True
+        )
 
         embed.set_thumbnail(url=self.bot.user.display_avatar.url)
+        embed.set_image(url=CANTINA_IMAGE_URL)
+        embed.set_footer(
+            text="CantinaCasino | Custom-built by The Cantina"
+        )
 
-        view = InfoView()
+        await interaction.response.send_message(
+            embed=embed,
+            view=InfoView()
+        )
 
-        if self.logo_path:
-            file = discord.File(self.logo_path, filename="cantina-logo.png")
-            embed.set_image(url="attachment://cantina-logo.png")
-            await interaction.response.send_message(embed=embed, file=file, view=view)
-        else:
-            await interaction.response.send_message(embed=embed, view=view)
-
-    @app_commands.command(name="about", description="General overview of CantinaCasino")
+    @app_commands.command(
+        name="about",
+        description="General overview of CantinaCasino"
+    )
     async def about(self, interaction: discord.Interaction):
         embed = discord.Embed(
             title="📜 About CantinaCasino",
             description=(
-                "CantinaCasino is a custom-built gambling & progression application created by **The Cantina**.\n\n"
-                "It features:\n"
+                "CantinaCasino is a custom-built gambling & progression application "
+                "created by **The Cantina**.\n\n"
                 "🎲 Casino-style games\n"
                 "💰 Global balances & leaderboards\n"
                 "📈 Experience and leveling\n"
@@ -75,17 +92,17 @@ class InfoCog(commands.Cog):
         )
 
         embed.set_thumbnail(url=self.bot.user.display_avatar.url)
+        embed.set_image(url=CANTINA_IMAGE_URL)
 
-        view = InfoView()
+        await interaction.response.send_message(
+            embed=embed,
+            view=InfoView()
+        )
 
-        if self.logo_path:
-            file = discord.File(self.logo_path, filename="cantina-logo.png")
-            embed.set_image(url="attachment://cantina-logo.png")
-            await interaction.response.send_message(embed=embed, file=file, view=view)
-        else:
-            await interaction.response.send_message(embed=embed, view=view)
-
-    @app_commands.command(name="development", description="Shows information about The Cantina team")
+    @app_commands.command(
+        name="development",
+        description="Shows information about The Cantina team"
+    )
     async def development(self, interaction: discord.Interaction):
         embed = discord.Embed(
             title="🛠️ About The Cantina",
@@ -102,14 +119,12 @@ class InfoCog(commands.Cog):
             color=discord.Color.green()
         )
 
-        view = InfoView()
+        embed.set_thumbnail(url=CANTINA_IMAGE_URL)
 
-        if self.logo_path:
-            file = discord.File(self.logo_path, filename="cantina-logo.png")
-            embed.set_thumbnail(url="attachment://cantina-logo.png")
-            await interaction.response.send_message(embed=embed, file=file, view=view)
-        else:
-            await interaction.response.send_message(embed=embed, view=view)
+        await interaction.response.send_message(
+            embed=embed,
+            view=InfoView()
+        )
 
 
 async def setup(bot: commands.Bot):

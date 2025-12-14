@@ -2,7 +2,7 @@ import discord
 from .utils import Utils
 
 class BlackjackView(discord.ui.View):
-    def __init__(self, interaction: discord.Interaction, db: Database):
+    def __init__(self, interaction: discord.Interaction, db):
         super().__init__(timeout=90)
         self.interaction = interaction
         self.db = db

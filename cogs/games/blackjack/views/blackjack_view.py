@@ -1,5 +1,5 @@
 import discord
-from .utils import Utils
+from blackjack.utils import Utils
 
 class BlackjackView(discord.ui.View):
     def __init__(self, interaction: discord.Interaction, db: Database):

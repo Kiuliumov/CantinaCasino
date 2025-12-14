@@ -6,6 +6,57 @@ from typing import List
 from src.DB import Database, User
 from src.decorators import autoregister
 
+class LeaderboardView(discord.ui.View):
+    def __init__(self, users: List[User], title: str, per_page: int = 10):
+        super().__init__(timeout=120)
+        self.users = users
+        self.title = title
+        self.per_page = per_page
+        self.current_page = 0
+        self.max_page = (len(users) - 1) // per_page
+
+        self.update_buttons()
+
+    def update_buttons(self):
+        for child in self.children:
+            if child.custom_id == "previous":
+                child.disabled = self.current_page == 0
+            elif child.custom_id == "next":
+                child.disabled = self.current_page == self.max_page
+
+    def get_page_embed(self):
+        start = self.current_page * self.per_page
+        end = start + self.per_page
+        page_users = self.users[start:end]
+
+        description = ""
+        for i, u in enumerate(page_users, start=start+1):
+            if "Balance" in self.title:
+                description += f"**{i}.** <@{u.discord_id}> — {u.balance:,} coins (Level {u.level}, XP {u.experience:,})\n"
+            else:
+                description += f"**{i}.** <@{u.discord_id}> — {u.experience:,} XP (Level {u.level}, {u.balance:,} coins)\n"
+
+        embed = discord.Embed(
+            title=self.title,
+            description=description or "No users yet",
+            color=discord.Color.gold() if "Balance" in self.title else discord.Color.green()
+        )
+        embed.set_footer(text=f"Page {self.current_page + 1}/{self.max_page + 1}")
+        return embed
+
+    @discord.ui.button(emoji="<:arrowleft:1210243998384652308>", style=discord.ButtonStyle.primary, custom_id="previous")
+    async def previous(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.current_page -= 1
+        self.update_buttons()
+        await interaction.response.edit_message(embed=self.get_page_embed(), view=self)
+
+    @discord.ui.button(emoji="<:arrowright:1210243999982682173>", style=discord.ButtonStyle.primary, custom_id="next")
+    async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.current_page += 1
+        self.update_buttons()
+        await interaction.response.edit_message(embed=self.get_page_embed(), view=self)
+
+
 class EconomyCog(commands.Cog):
     def __init__(self, bot: commands.Bot, db_path: str = "sqlite:///casino.db"):
         self.bot = bot
@@ -92,23 +143,19 @@ class EconomyCog(commands.Cog):
 
     @app_commands.command(name="baltop", description="Show top users by balance")
     @autoregister(db=Database("sqlite:///casino.db"))
-    async def baltop(self, interaction: discord.Interaction, limit: int = 10, offset: int = 0):
-        top_users: List[User] = self.db.top_balance(limit=limit, offset=offset)
-        description = ""
-        for i, u in enumerate(top_users):
-            description += f"**{i+1+offset}.** <@{u.discord_id}> — {u.balance:,} coins (Level {u.level}, XP {u.experience:,})\n"
-        embed = discord.Embed(title="💰 Balance Leaderboard", description=description or "No users yet", color=discord.Color.gold())
-        await interaction.response.send_message(embed=embed)
+    async def baltop(self, interaction: discord.Interaction):
+        limit = 10
+        top_users: List[User] = self.db.top_balance(limit=limit)
+        view = LeaderboardView(top_users, title="Balance Leaderboard", per_page=10)
+        await interaction.response.send_message(embed=view.get_page_embed(), view=view)
 
     @app_commands.command(name="xptop", description="Show top users by experience")
     @autoregister(db=Database("sqlite:///casino.db"))
-    async def xptop(self, interaction: discord.Interaction, limit: int = 10, offset: int = 0):
-        top_users: List[User] = self.db.top_experience(limit=limit, offset=offset)
-        description = ""
-        for i, u in enumerate(top_users):
-            description += f"**{i+1+offset}.** <@{u.discord_id}> — {u.experience:,} XP (Level {u.level}, {u.balance:,} coins)\n"
-        embed = discord.Embed(title="🧩 Experience Leaderboard", description=description or "No users yet", color=discord.Color.green())
-        await interaction.response.send_message(embed=embed)
+    async def xptop(self, interaction: discord.Interaction):
+        limit = 10
+        top_users: List[User] = self.db.top_experience(limit=limit)
+        view = LeaderboardView(top_users, title="Experience Leaderboard", per_page=10)
+        await interaction.response.send_message(embed=view.get_page_embed(), view=view)
 
 
 async def setup(bot: commands.Bot):

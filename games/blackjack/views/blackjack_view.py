@@ -1,13 +1,13 @@
 import discord
+
+
 class BlackjackView(discord.ui.View):
     def __init__(self, interaction: discord.Interaction, db: Database):
         super().__init__(timeout=90)
         self.interaction = interaction
         self.db = db
         self.user_id = interaction.user.id
-        self.reset_game()
 
-    def reset_game(self):
         self.player_hand = [draw_card(), draw_card()]
         self.dealer_hand = [draw_card(), draw_card()]
         self.finished = False
@@ -130,4 +130,3 @@ class BlackjackView(discord.ui.View):
             embed=self.build_embed(),
             view=self
         )
-

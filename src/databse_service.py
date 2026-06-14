@@ -6,6 +6,11 @@ Base = declarative_base()
 
 
 class User(Base):
+
+    """
+        An abstraction over the user entity in the database.
+    """
+
     __tablename__ = "users"
 
     discord_id: int = Column(BigInteger, primary_key=True, unique=True)
@@ -17,7 +22,7 @@ class User(Base):
         return f"<User {self.discord_id} | Balance {self.balance} | EXP {self.experience} | Level {self.level}>"
 
 
-class Database:
+class DatabaseService:
     def __init__(self, sqlite_path: str = "sqlite:///casino.db") -> None:
         self.engine = create_engine(sqlite_path, echo=False)
         Base.metadata.create_all(self.engine)

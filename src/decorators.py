@@ -1,8 +1,8 @@
-from src.DB import Database
+from database_serivce import DatabaseService
 from functools import wraps
 import discord
 
-def autoregister(db: Database):
+def autoregister(db: DatabaseService):
     def decorator(func):
         @wraps(func)
         async def wrapper(self, interaction: discord.Interaction, *args, **kwargs):

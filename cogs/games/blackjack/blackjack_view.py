@@ -1,6 +1,7 @@
 import discord
 from .utils import Utils
 
+
 class BlackjackView(discord.ui.View):
     def __init__(self, interaction: discord.Interaction, db):
         super().__init__(timeout=90)
@@ -27,36 +28,25 @@ class BlackjackView(discord.ui.View):
     def build_embed(self, reveal_dealer=False, footer=None):
         user = self.db.get_user(self.user_id)
 
-        embed = discord.Embed(
-            title="🎰 Blackjack",
-            color=discord.Color.dark_gold()
-        )
+        embed = discord.Embed(title="🎰 Blackjack", color=discord.Color.dark_gold())
 
-        embed.add_field(
-            name="💰 Balance",
-            value=f"{user.balance}",
-            inline=False
-        )
+        embed.add_field(name="💰 Balance", value=f"{user.balance}", inline=False)
 
         embed.add_field(
             name="🧑 You",
             value=f"{format_hand(self.player_hand)}\n**Value:** {hand_value(self.player_hand)}",
-            inline=False
+            inline=False,
         )
 
         if reveal_dealer:
             embed.add_field(
                 name="🤖 Dealer",
                 value=f"{format_hand(self.dealer_hand)}\n**Value:** {hand_value(self.dealer_hand)}",
-                inline=False
+                inline=False,
             )
         else:
             r, s = self.dealer_hand[0]
-            embed.add_field(
-                name="🤖 Dealer",
-                value=f"{r}{s} ❓",
-                inline=False
-            )
+            embed.add_field(name="🤖 Dealer", value=f"{r}{s} ❓", inline=False)
 
         if footer:
             embed.set_footer(text=footer)
@@ -72,8 +62,7 @@ class BlackjackView(discord.ui.View):
         self.play_again.disabled = False
 
         await interaction.response.edit_message(
-            embed=self.build_embed(reveal_dealer=True, footer=result_text),
-            view=self
+            embed=self.build_embed(reveal_dealer=True, footer=result_text), view=self
         )
 
     @discord.ui.button(label="Hit", style=discord.ButtonStyle.primary, emoji="🃏")
@@ -84,10 +73,7 @@ class BlackjackView(discord.ui.View):
             await self.end_game(interaction, "💥 You busted!", -10)
             return
 
-        await interaction.response.edit_message(
-            embed=self.build_embed(),
-            view=self
-        )
+        await interaction.response.edit_message(embed=self.build_embed(), view=self)
 
     @discord.ui.button(label="Stand", style=discord.ButtonStyle.secondary, emoji="✋")
     async def stand(self, interaction: discord.Interaction, _):
@@ -126,7 +112,4 @@ class BlackjackView(discord.ui.View):
     @discord.ui.button(label="Play Again", style=discord.ButtonStyle.primary, emoji="🔄", disabled=True)
     async def play_again(self, interaction: discord.Interaction, _):
         self.reset_game()
-        await interaction.response.edit_message(
-            embed=self.build_embed(),
-            view=self
-        )
+        await interaction.response.edit_message(embed=self.build_embed(), view=self)

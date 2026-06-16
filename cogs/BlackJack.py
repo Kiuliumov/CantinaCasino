@@ -6,6 +6,7 @@ from src.DB import Database
 from src.decorators import autoregister
 from cogs.games.blackjack.blackjack_view import BlackjackView
 
+
 class BlackjackCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -18,10 +19,7 @@ class BlackjackCog(commands.Cog):
 
         view = BlackjackView(interaction, self.db)
 
-        await interaction.response.send_message(
-            embed=view.build_embed(),
-            view=view
-        )
+        await interaction.response.send_message(embed=view.build_embed(), view=view)
 
 
 async def setup(bot: commands.Bot):

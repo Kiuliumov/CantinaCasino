@@ -6,6 +6,7 @@ from typing import List
 from src.DB import Database, User
 from src.decorators import autoregister
 
+
 class LeaderboardView(discord.ui.View):
     def __init__(self, users: List[User], title: str, per_page: int = 10):
         super().__init__(timeout=120)
@@ -30,21 +31,27 @@ class LeaderboardView(discord.ui.View):
         page_users = self.users[start:end]
 
         description = ""
-        for i, u in enumerate(page_users, start=start+1):
+        for i, u in enumerate(page_users, start=start + 1):
             if "Balance" in self.title:
-                description += f"**{i}.** <@{u.discord_id}> — {u.balance:,} coins (Level {u.level}, XP {u.experience:,})\n"
+                description += (
+                    f"**{i}.** <@{u.discord_id}> — {u.balance:,} coins (Level {u.level}, XP {u.experience:,})\n"
+                )
             else:
-                description += f"**{i}.** <@{u.discord_id}> — {u.experience:,} XP (Level {u.level}, {u.balance:,} coins)\n"
+                description += (
+                    f"**{i}.** <@{u.discord_id}> — {u.experience:,} XP (Level {u.level}, {u.balance:,} coins)\n"
+                )
 
         embed = discord.Embed(
             title=self.title,
             description=description or "No users yet",
-            color=discord.Color.gold() if "Balance" in self.title else discord.Color.green()
+            color=discord.Color.gold() if "Balance" in self.title else discord.Color.green(),
         )
         embed.set_footer(text=f"Page {self.current_page + 1}/{self.max_page + 1}")
         return embed
 
-    @discord.ui.button(emoji="<:arrowleft:1210243998384652308>", style=discord.ButtonStyle.primary, custom_id="previous")
+    @discord.ui.button(
+        emoji="<:arrowleft:1210243998384652308>", style=discord.ButtonStyle.primary, custom_id="previous"
+    )
     async def previous(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.current_page -= 1
         self.update_buttons()
@@ -71,7 +78,7 @@ class EconomyCog(commands.Cog):
         embed = discord.Embed(
             title=f"💰 {interaction.user.name}'s Balance",
             color=discord.Color.blurple(),
-            timestamp=datetime.datetime.utcnow()
+            timestamp=datetime.datetime.utcnow(),
         )
         embed.set_thumbnail(url=interaction.user.display_avatar.url)
         embed.add_field(name="Coins", value=f"{user.balance:,}", inline=True)
@@ -86,8 +93,8 @@ class EconomyCog(commands.Cog):
         user = self.db.get_user(interaction.user.id)
         last = self.daily_cooldowns.get(interaction.user.id)
 
-        if last and (now - last).total_seconds() < 24*3600:
-            remaining = 24*3600 - (now - last).total_seconds()
+        if last and (now - last).total_seconds() < 24 * 3600:
+            remaining = 24 * 3600 - (now - last).total_seconds()
             hours = int(remaining // 3600)
             minutes = int((remaining % 3600) // 60)
             await interaction.response.send_message(f"⏳ You can claim your daily reward in {hours}h {minutes}m.")
@@ -102,7 +109,7 @@ class EconomyCog(commands.Cog):
             title="✅ Daily Reward Claimed!",
             description="You received **1,000 coins** and **10 XP**.",
             color=discord.Color.gold(),
-            timestamp=now
+            timestamp=now,
         )
         embed.set_thumbnail(url=interaction.user.display_avatar.url)
         embed.add_field(name="New Balance", value=f"{user.balance:,} coins", inline=True)
@@ -117,10 +124,10 @@ class EconomyCog(commands.Cog):
         user = self.db.get_user(interaction.user.id)
         last = self.weekly_cooldowns.get(interaction.user.id)
 
-        if last and (now - last).total_seconds() < 7*24*3600:
-            remaining = 7*24*3600 - (now - last).total_seconds()
-            days = int(remaining // (24*3600))
-            hours = int((remaining % (24*3600)) // 3600)
+        if last and (now - last).total_seconds() < 7 * 24 * 3600:
+            remaining = 7 * 24 * 3600 - (now - last).total_seconds()
+            days = int(remaining // (24 * 3600))
+            hours = int((remaining % (24 * 3600)) // 3600)
             await interaction.response.send_message(f"⏳ You can claim your weekly reward in {days}d {hours}h.")
             return
 
@@ -133,7 +140,7 @@ class EconomyCog(commands.Cog):
             title="🏆 Weekly Reward Claimed!",
             description="You received **50,000 coins** and **50 XP**.",
             color=discord.Color.green(),
-            timestamp=now
+            timestamp=now,
         )
         embed.set_thumbnail(url=interaction.user.display_avatar.url)
         embed.add_field(name="New Balance", value=f"{user.balance:,} coins", inline=True)

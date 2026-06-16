@@ -1,0 +1,2 @@
+import on_ready
+import setup_hook

@@ -1,10 +1,9 @@
 from client import Client
 
+
 @client.event
 async def on_ready():
     try:
-        GUILD_ID = os.getenv('GUILD_ID')
-        guild = discord.Object(id=GUILD_ID)
         synced_commands = await client.tree.sync()
         synced_names = [cmd.name for cmd in synced_commands]
     except Exception as e:

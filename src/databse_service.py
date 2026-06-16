@@ -6,9 +6,8 @@ Base = declarative_base()
 
 
 class User(Base):
-
     """
-        An abstraction over the user entity in the database.
+    An abstraction over the user entity in the database.
     """
 
     __tablename__ = "users"
